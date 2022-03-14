@@ -2,24 +2,23 @@ namespace DevJobs.API.Controllers
 {
     using DevJobs.API.Entities;
     using DevJobs.API.Models;
-    using DevJobs.API.Persistence;
+    using DevJobs.API.Persistence.Repositories;
     using Microsoft.AspNetCore.Mvc;
 
     [Route("api/job-vacancies/{id}/applications")]
     [ApiController]
     public class JobApplicationsController : ControllerBase
     {
-        private readonly DevJobsContext _context;
-        public JobApplicationsController(DevJobsContext context)
+        private readonly IJobVacancyRepository _jobVacancyRepository;
+        public JobApplicationsController(IJobVacancyRepository jobVacancyRepository)
         {
-            _context = context;
+            _jobVacancyRepository = jobVacancyRepository;
         }
 
         [HttpPost]
         public IActionResult Post(int id, AddJobApplicationInputModel model)
         {
-            var jobVacancy = _context.JobVacancies
-                .SingleOrDefault(jv => jv.Id == id);
+            var jobVacancy = _jobVacancyRepository.GetById(id);
 
             if (jobVacancy == null)
                 return NotFound();
@@ -30,7 +29,7 @@ namespace DevJobs.API.Controllers
                 id
             );
 
-            jobVacancy.Applications.Add(application);
+            _jobVacancyRepository.AddApplication(application);
 
             return NoContent();
         }
